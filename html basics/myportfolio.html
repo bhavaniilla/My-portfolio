@@ -12,12 +12,15 @@
     <a href=""><button>contact</button></a>
         </header>
         <main>
-    <img src="bhavani.jpg">
+            <section id="about">
+                <img src="bhavani.jpg" hight="200" width="200">
     <h1>balabhavaniilla</h1>
-    <section><p>I am a passionate web developer with a focus on a front-end technolgies</p></section>
-    <section><p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswari</i> degree college pengonda</p></section>
-    <section><p>I have learnt web development form<br>code with bhavani</br></p></section>
-    <section><p>you can <strong>click her</strong> to checkout what i have learnt in html css javascript</p></section>
+    <p>I am a passionate web developer with a focus on a front-end technolgies</p>
+    <p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswari</i> degree college pengonda</p></section>
+    <p>I have learnt web development form<br>code with bhavani</br></p>
+    <p>you can <strong>click her</strong> to checkout what i have learnt in html css javascript</p>
+            </section>
+            <section id="skills">
     <h1>My Skills</h1>
     <ol>
     <li>Python Basics</li>
@@ -25,26 +28,66 @@
         <li>CSS</li>
         <li>JavaScript</li>
     </ol>
-    </main>
+     </section>
+     <section id="Projects">
+    <h1>My Projects</h1>
+    <table border="2">
+        <tr>
+            <th>project</th>
+            <th>description</th>
+        </tr>
+        <tr>
+            <td>
+                portfolio website
+            </td>
+            <td>
+                i have a built a portfolio website by using html css javascript
+            </td>
+        </tr>
+        <tr>
+            <td>python simple calculator</td>
+            <td>i have built a simple calculator in this course by code with bhavani</td>
+        </tr>
+    </table>
+    </section>
+    <section id="Contact Me">
     <h2><b>contact me</b></h2>
     <p>feel free to get in touch with me using the form below</p>
     <form>
         <label for="name">Name:</label>
-        <input type="text">
-        <label for="email">Email</label>
-        <input type="text">
+        <input type="text"required placeholder="UserName">
+        <label for="email">Email:</label>
+        <input type="email"required>
         <br>
         <b>choose your gender:</b>
         <input type="radio" id="male" value="male">
         <label for="male">Male</label>
         <input type="radio" id="female" value="female">
-        <label for="female">Female</label>
-        <br>
+         <br>
         <b>choose your intersets:</b>
         <input type="checkbox" id="coding" value="coding>
         <label for="coding">coding</label>
         <input type="checkbox" id="reading value="reading>
-        <label for="reading">Label</label>
-    </form>
+        <label for="reading">reading</label>
+        <br>
+        <br>
+        <b><label for="bio(upto 200 charecters)">bio(up to 200 charecters)></label><br></b>
+        <textarea id="bio(upto 200 charecters)" maxlength="200" rows="5" colls="5" placeholder="share your biography"></textarea>
+        <br>
+        <button type="submit">submit</button>
+        <button type="reset">reset</button>
+ </form>
+ </section>
+ </main>
+ <footer>
+   <p>@2023 My portfolio</p>
+ </footer>
+
+
+
+
+
+
+   
     </body>
 </html>
