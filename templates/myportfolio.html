@@ -1,93 +1,134 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>myportfolio</title>
-    </head>
-    <body>
-        <header>
-        <h1>welcome to my portfolio<h1>
-    <a href=""><button>about</button></a>
-    <a href=""><button>skills</button></a>
-    <a href=""><button>project</button></a>
-    <a href=""><button>contact</button></a>
-        </header>
-        <main>
-            <section id="about">
-                <img src="bhavani.jpg" hight="200" width="200">
-    <h1>balabhavaniilla</h1>
-    <p>I am a passionate web developer with a focus on a front-end technolgies</p>
-    <p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswari</i> degree college pengonda</p></section>
-    <p>I have learnt web development form<br>code with bhavani</br></p>
-    <p>you can <strong>click her</strong> to checkout what i have learnt in html css javascript</p>
-            </section>
-            <section id="skills">
-    <h1>My Skills</h1>
-    <ol>
-    <li>Python Basics</li>
-        <li>Html</li>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Portfolio</title>
+  <!--
+    Simple portfolio page.
+    Corrected markup for accessibility, validity, and readability.
+    - Added charset meta tag.
+    - Added viewport meta tag.
+    - Improved semantic structure and fixed invalid attributes.
+    - Fixed IDs and internal links.
+    - Added alt text for images.
+    - Fixed form inputs and labels for accessibility.
+  -->
+</head>
+<body>
+  <header>
+    <h1>Welcome to my portfolio</h1>
+    <nav aria-label="Main navigation">
+      <!-- Internal links updated to reference section IDs -->
+      <a href="#about"><button type="button">About</button></a>
+      <a href="#skills"><button type="button">Skills</button></a>
+      <a href="#projects"><button type="button">Projects</button></a>
+      <a href="#contact"><button type="button">Contact</button></a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- About section -->
+    <section id="about">
+      <img src="bhavani.jpg" alt="Portrait of Balabhavani" height="200" width="200">
+      <h2>Balabhavaniilla</h2>
+      <p>I am a passionate web developer with a focus on front-end technologies.</p>
+      <p>
+        I completed my MCA at <em>Andhra University, Vishakapatnam</em>. I earned my degree at
+        <i>Sri Vasavi Kanya Parameswari Degree College, Pengonda</i>.
+      </p>
+      <p>I have learned web development from Code with Bhavani.</p>
+      <p>
+        You can <strong>click here</strong> to check out what I have learned in HTML, CSS,
+        and JavaScript.
+      </p>
+    </section>
+
+    <!-- Skills section -->
+    <section id="skills">
+      <h2>My Skills</h2>
+      <ol>
+        <li>Python Basics</li>
+        <li>HTML</li>
         <li>CSS</li>
         <li>JavaScript</li>
-    </ol>
-     </section>
-     <section id="Projects">
-    <h1>My Projects</h1>
-    <table border="2">
-        <tr>
-            <th>project</th>
-            <th>description</th>
-        </tr>
-        <tr>
-            <td>
-                portfolio website
-            </td>
-            <td>
-                i have a built a portfolio website by using html css javascript
-            </td>
-        </tr>
-        <tr>
-            <td>python simple calculator</td>
-            <td>i have built a simple calculator in this course by code with bhavani</td>
-        </tr>
-    </table>
+      </ol>
     </section>
-    <section id="Contact Me">
-    <h2><b>contact me</b></h2>
-    <p>feel free to get in touch with me using the form below</p>
-    <form>
-        <label for="name">Name:</label>
-        <input type="text"required placeholder="UserName">
-        <label for="email">Email:</label>
-        <input type="email"required>
-        <br>
-        <b>choose your gender:</b>
-        <input type="radio" id="male" value="male">
-        <label for="male">Male</label>
-        <input type="radio" id="female" value="female">
-         <br>
-        <b>choose your intersets:</b>
-        <input type="checkbox" id="coding" value="coding>
-        <label for="coding">coding</label>
-        <input type="checkbox" id="reading value="reading>
-        <label for="reading">reading</label>
-        <br>
-        <br>
-        <b><label for="bio(upto 200 charecters)">bio(up to 200 charecters)></label><br></b>
-        <textarea id="bio(upto 200 charecters)" maxlength="200" rows="5" colls="5" placeholder="share your biography"></textarea>
-        <br>
-        <button type="submit">submit</button>
-        <button type="reset">reset</button>
- </form>
- </section>
- </main>
- <footer>
-   <p>@2023 My portfolio</p>
- </footer>
 
+    <!-- Projects section -->
+    <section id="projects">
+      <h2>My Projects</h2>
+      <table border="2" summary="List of projects and descriptions">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Portfolio website</td>
+            <td>I built a portfolio website using HTML, CSS, and JavaScript.</td>
+          </tr>
+          <tr>
+            <td>Python simple calculator</td>
+            <td>I built a simple calculator during a course with Code with Bhavani.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
 
+    <!-- Contact section -->
+    <section id="contact">
+      <h2>Contact Me</h2>
+      <p>Feel free to get in touch with me using the form below.</p>
 
+      <!-- Contact form: improved structure and accessibility -->
+      <form action="#" method="post" aria-label="Contact form">
+        <div>
+          <label for="name">Name:</label>
+          <input id="name" name="name" type="text" required placeholder="User Name">
+        </div>
 
+        <div>
+          <label for="email">Email:</label>
+          <input id="email" name="email" type="email" required placeholder="you@example.com">
+        </div>
 
+        <fieldset>
+          <legend>Choose your gender</legend>
+          <input type="radio" id="male" name="gender" value="male">
+          <label for="male">Male</label>
 
-   
-    </body>
+          <input type="radio" id="female" name="gender" value="female">
+          <label for="female">Female</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Choose your interests</legend>
+          <input type="checkbox" id="coding" name="interests" value="coding">
+          <label for="coding">Coding</label>
+
+          <input type="checkbox" id="reading" name="interests" value="reading">
+          <label for="reading">Reading</label>
+        </fieldset>
+
+        <div>
+          <label for="bio">Bio (up to 200 characters):</label><br>
+          <textarea id="bio" name="bio" maxlength="200" rows="5" cols="50"
+            placeholder="Share your biography"></textarea>
+        </div>
+
+        <div>
+          <button type="submit">Submit</button>
+          <button type="reset">Reset</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2023 My portfolio</p>
+  </footer>
+</body>
 </html>
