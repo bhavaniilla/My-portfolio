@@ -1,4 +1,24 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""
+Module to provide and optionally write a simple HTML snippet containing an empty iframe
+and an embedded YouTube video. This module is designed to be production-ready with
+comprehensive error handling, logging, type hints, and clear documentation.
+
+Usage:
+    python3 this_module.py            # writes 'index.html' in the current directory
+    python3 this_module.py -o out.html
+"""
+
+from __future__ import annotations
+
+import argparse
+import logging
+import sys
+from pathlib import Path
+from typing import Union
+
+# Constants should be UPPER_CASE
+HTML_TEMPLATE: str = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Document character encoding for proper text rendering -->
@@ -20,3 +40,124 @@
             allowfullscreen></iframe>
 </body>
 </html>
+"""
+
+# Configure logging for the module
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+logger = logging.getLogger(__name__)
+
+
+def get_html() -> str:
+    """
+    Return the HTML template string.
+
+    Returns:
+        str: The HTML content.
+    """
+    logger.debug("Returning HTML template.")
+    return HTML_TEMPLATE
+
+
+def write_html_file(file_path: Union[str, Path]) -> Path:
+    """
+    Write the HTML_TEMPLATE to the given file path using safe file operations.
+
+    Args:
+        file_path (Union[str, Path]): Path to the output file.
+
+    Returns:
+        Path: Path object pointing to the written file.
+
+    Raises:
+        TypeError: If file_path is not a string or pathlib.Path.
+        ValueError: If file_path resolves to an empty path.
+        OSError: For filesystem related errors (propagated after logging).
+    """
+    if file_path is None:
+        logger.error("Provided file_path is None.")
+        raise ValueError("file_path must not be None")
+
+    if not isinstance(file_path, (str, Path)):
+        logger.error("file_path has invalid type: %s", type(file_path))
+        raise TypeError("file_path must be a str or pathlib.Path")
+
+    out_path = Path(file_path).expanduser().resolve()
+    if str(out_path).strip() == "":
+        logger.error("Resolved file path is empty after stripping.")
+        raise ValueError("file_path must not be empty")
+
+    try:
+        # Ensure parent directory exists
+        parent_dir = out_path.parent
+        if not parent_dir.exists():
+            logger.debug("Creating parent directories for path: %s", parent_dir)
+            parent_dir.mkdir(parents=True, exist_ok=True)
+
+        # Write file using 'with' context manager and explicit encoding
+        logger.info("Writing HTML content to %s", out_path)
+        with out_path.open("w", encoding="utf-8") as f:
+            f.write(get_html())
+
+        logger.info("Successfully wrote HTML to %s", out_path)
+        return out_path
+
+    except OSError as exc:
+        logger.exception("Failed to write HTML to %s: %s", out_path, exc)
+        raise
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments.
+
+    Args:
+        argv (list[str] | None): Argument list to parse (defaults to sys.argv[1:]).
+
+    Returns:
+        argparse.Namespace: Parsed arguments with attribute 'output'.
+    """
+    parser = argparse.ArgumentParser(description="Write a simple HTML file containing an iframe and a YouTube embed.")
+    parser.add_argument(
+        "-o",
+        "--output",
+        dest="output",
+        default="index.html",
+        help="Output file path (default: index.html)",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """
+    Main entry point. Writes the HTML template to the specified output file.
+
+    Args:
+        argv (list[str] | None): Argument list to parse (defaults to sys.argv[1:]).
+
+    Returns:
+        int: Exit code (0 on success, non-zero on error).
+    """
+    try:
+        args = parse_args(argv)
+        output_file = args.output
+
+        # Defensive type checking
+        if output_file is None:
+            logger.error("No output file specified.")
+            return 2
+
+        if not isinstance(output_file, (str, Path)):
+            logger.error("Invalid type for output_file: %s", type(output_file))
+            return 2
+
+        write_html_file(output_file)
+        return 0
+
+    except Exception as exc:  # broad exception to ensure non-zero exit on unexpected errors
+        logger.exception("An unexpected error occurred: %s", exc)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

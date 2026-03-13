@@ -1,4 +1,39 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""
+Safe, production-ready utility to write a simple portfolio HTML file.
+
+This module provides a single function `generate_portfolio_html` that writes
+a corrected and accessible portfolio HTML page to disk using UTF-8 encoding.
+Comprehensive error handling and logging are included.
+
+Usage:
+    from portfolio_writer import generate_portfolio_html
+    generate_portfolio_html("portfolio.html")
+
+Or run as a script:
+    python portfolio_writer.py --output portfolio.html
+"""
+
+from __future__ import annotations
+
+import argparse
+import logging
+from pathlib import Path
+from typing import Union
+
+# Configure module-level logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+_handler = logging.StreamHandler()
+_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+)
+logger.addHandler(_handler)
+
+DEFAULT_OUTPUT_FILE = "portfolio.html"
+
+# HTML content to be written. Charset meta tag is included near the top of <head>.
+PORTFOLIO_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -132,3 +167,73 @@
   </footer>
 </body>
 </html>
+"""
+
+
+def generate_portfolio_html(output_path: Union[str, Path]) -> Path:
+    """
+    Write the portfolio HTML content to a file using UTF-8 encoding.
+
+    Args:
+        output_path: Path or string specifying where to write the HTML file.
+
+    Returns:
+        Path to the written file.
+
+    Raises:
+        ValueError: If output_path is None or not a str/Path.
+        OSError: If an OS-related error occurs while writing the file.
+    """
+    if output_path is None:
+        logger.error("No output_path provided to generate_portfolio_html.")
+        raise ValueError("output_path must not be None")
+
+    if not isinstance(output_path, (str, Path)):
+        logger.error(
+            "Invalid type for output_path: %s (expected str or Path).",
+            type(output_path),
+        )
+        raise ValueError("output_path must be a string or pathlib.Path")
+
+    path = Path(output_path)
+    try:
+        # Ensure parent directory exists
+        if path.parent and not path.parent.exists():
+            logger.debug("Creating parent directories for: %s", path.parent)
+            path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write the file using a context manager and UTF-8 encoding
+        with path.open("w", encoding="utf-8") as fh:
+            fh.write(PORTFOLIO_HTML)
+        logger.info("Portfolio HTML written successfully to: %s", path.resolve())
+        return path.resolve()
+    except OSError as exc:
+        logger.exception("Failed to write portfolio HTML to %s: %s", path, exc)
+        raise
+
+
+def _parse_args() -> argparse.Namespace:
+    """Parse command-line arguments for the script."""
+    parser = argparse.ArgumentParser(description="Write a portfolio HTML file.")
+    parser.add_argument(
+        "--output",
+        "-o",
+        default=DEFAULT_OUTPUT_FILE,
+        help=f"Path to output HTML file (default: {DEFAULT_OUTPUT_FILE})",
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Main entrypoint for CLI usage."""
+    args = _parse_args()
+    try:
+        output_path = generate_portfolio_html(args.output)
+        logger.info("Done. Output file: %s", output_path)
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.error("An error occurred: %s", exc)
+        raise
+
+
+if __name__ == "__main__":
+    main()

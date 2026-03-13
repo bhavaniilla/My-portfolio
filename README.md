@@ -1,3 +1,3 @@
-# Tests
+# Source Code
 
-Unit and integration tests.
+Main source code directory.
