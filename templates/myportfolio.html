@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+from typing import Optional
+
+IMAGE_SIZE = 200
+TABLE_BORDER = 2
+BIO_MAX_LENGTH = 200
+TEXTAREA_ROWS = 5
+TEXTAREA_COLS = 5
+COPYRIGHT_YEAR = 2023
+
+
+def build_portfolio_html() -> str:
+    return f"""<!DOCTYPE html>
 <html>
     <head>
         <title>myportfolio</title>
@@ -13,10 +24,10 @@
         </header>
         <main>
             <section id="about">
-                <img src="bhavani.jpg" hight="200" width="200">
+                <img src="bhavani.jpg" hight="{IMAGE_SIZE}" width="{IMAGE_SIZE}">
     <h1>balabhavaniilla</h1>
     <p>I am a passionate web developer with a focus on a front-end technolgies</p>
-    <p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswari</i> degree college pengonda</p></section>
+    <p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswar...
     <p>I have learnt web development form<br>code with bhavani</br></p>
     <p>you can <strong>click her</strong> to checkout what i have learnt in html css javascript</p>
             </section>
@@ -31,7 +42,7 @@
      </section>
      <section id="Projects">
     <h1>My Projects</h1>
-    <table border="2">
+    <table border="{TABLE_BORDER}">
         <tr>
             <th>project</th>
             <th>description</th>
@@ -72,7 +83,7 @@
         <br>
         <br>
         <b><label for="bio(upto 200 charecters)">bio(up to 200 charecters)></label><br></b>
-        <textarea id="bio(upto 200 charecters)" maxlength="200" rows="5" colls="5" placeholder="share your biography"></textarea>
+        <textarea id="bio(upto 200 charecters)" maxlength="{BIO_MAX_LENGTH}" rows="{TEXTAREA_ROWS}" colls="{TEXTAREA_COLS}" placeholder="share your biography"...
         <br>
         <button type="submit">submit</button>
         <button type="reset">reset</button>
@@ -80,7 +91,7 @@
  </section>
  </main>
  <footer>
-   <p>@2023 My portfolio</p>
+   <p>@{COPYRIGHT_YEAR} My portfolio</p>
  </footer>
 
 
@@ -91,3 +102,20 @@
    
     </body>
 </html>
+"""
+
+
+def save_portfolio(path: Optional[str] = None) -> str:
+    if path is None:
+        path = "portfolio.html"
+    if not isinstance(path, str):
+        raise TypeError("path must be a string")
+    html = build_portfolio_html()
+    with open(path, "w", encoding="utf-8") as file:
+        file.write(html)
+    return path
+
+
+if __name__ == "__main__":
+    saved_path = save_portfolio()
+    print(f"Saved portfolio to {saved_path}")

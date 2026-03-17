@@ -1,14 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>audio</title>
-</head>
-<body>
-        <iframe src="" frameborder="0"></iframe>
-        <iframe width="560" height="315" 
-        src="https://www.youtube.com/embed/ZGrdjGQZ9ug?si=8QpruIUflkEbyucK" 
-        title="YouTube video player" frameborder="0
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</body>
-</html>
+DEFAULT_IFRAME_WIDTH = 560
+DEFAULT_IFRAME_HEIGHT = 315
+
+
+def generate_html(width: int | None = None, height: int | None = None) -> str:
+    """
+    Generate the HTML content with iframe dimensions.
+
+    Preserves the original HTML content and structure exactly, while allowing
+    the width and height magic numbers to be supplied or defaulted.
+    """
+    if width is None:
+        width = DEFAULT_IFRAME_WIDTH
+    if height is None:
+        height = DEFAULT_IFRAME_HEIGHT
+
+    if not isinstance(width, int) or not isinstance(height, int):
+        raise TypeError("width and height must be integers")
+
+    html = (
+        f"<!DOCTYPE html>\n"
+        f"<html lang=\"en\">\n"
+        f"<head>\n"
+        f"    <title>audio</title>\n"
+        f"</head>\n"
+        f"<body>\n"
+        f"        <iframe src=\"\" frameborder=\"0\"></iframe>\n"
+        f"        <iframe width=\"{width}\" height=\"{height}\" \n"
+        f"        src=\"https://www.youtube.com/embed/ZGrdjGQZ9ug?si=8QpruIUflkEbyucK\" \n"
+        f"        title=\"YouTube video player\" frameborder=\"0\n"
+        f"        allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" \n"
+        f"        referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>\n"
+        f"</body>\n"
+        f"</html>\n"
+    )
+    return html
+
+
+def write_html_file(filename: str, content: str) -> None:
+    """
+    Write the provided HTML content to a file using a context manager.
+    """
+    if filename is None:
+        raise ValueError("filename must not be None")
+    if not isinstance(filename, str):
+        raise TypeError("filename must be a string")
+
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(content)
+
+
+if __name__ == "__main__":
+    html_content = generate_html()
+    write_html_file("audio.html", html_content)
