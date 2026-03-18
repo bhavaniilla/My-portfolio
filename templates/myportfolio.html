@@ -31,8 +31,12 @@ _handler.setFormatter(
 logger.addHandler(_handler)
 
 DEFAULT_OUTPUT_FILE = "portfolio.html"
+DEFAULT_ENCODING = "utf-8"
+IMAGE_DIMENSION = 200
+TABLE_BORDER = 2
 
 # HTML content to be written. Charset meta tag is included near the top of <head>.
+# IMAGE_DIMENSION and TABLE_BORDER are injected at write time to avoid magic numbers.
 PORTFOLIO_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,7 +69,7 @@ PORTFOLIO_HTML = """<!DOCTYPE html>
   <main>
     <!-- About section -->
     <section id="about">
-      <img src="bhavani.jpg" alt="Portrait of Balabhavani" height="200" width="200">
+      <img src="bhavani.jpg" alt="Portrait of Balabhavani" height="{image_dim}" width="{image_dim}">
       <h2>Balabhavaniilla</h2>
       <p>I am a passionate web developer with a focus on front-end technologies.</p>
       <p>
@@ -93,7 +97,7 @@ PORTFOLIO_HTML = """<!DOCTYPE html>
     <!-- Projects section -->
     <section id="projects">
       <h2>My Projects</h2>
-      <table border="2" summary="List of projects and descriptions">
+      <table border="{table_border}" summary="List of projects and descriptions">
         <thead>
           <tr>
             <th>Project</th>
@@ -130,110 +134,96 @@ PORTFOLIO_HTML = """<!DOCTYPE html>
           <input id="email" name="email" type="email" required placeholder="you@example.com">
         </div>
 
-        <fieldset>
-          <legend>Choose your gender</legend>
-          <input type="radio" id="male" name="gender" value="male">
-          <label for="male">Male</label>
-
-          <input type="radio" id="female" name="gender" value="female">
-          <label for="female">Female</label>
-        </fieldset>
-
-        <fieldset>
-          <legend>Choose your interests</legend>
-          <input type="checkbox" id="coding" name="interests" value="coding">
-          <label for="coding">Coding</label>
-
-          <input type="checkbox" id="reading" name="interests" value="reading">
-          <label for="reading">Reading</label>
-        </fieldset>
-
         <div>
-          <label for="bio">Bio (up to 200 characters):</label><br>
-          <textarea id="bio" name="bio" maxlength="200" rows="5" cols="50"
-            placeholder="Share your biography"></textarea>
+          <label for="message">Message:</label>
+          <textarea id="message" name="message" rows="5" required placeholder="Your message here"></textarea>
         </div>
 
         <div>
-          <button type="submit">Submit</button>
-          <button type="reset">Reset</button>
+          <button type="submit">Send</button>
         </div>
       </form>
     </section>
   </main>
 
   <footer>
-    <p>© 2023 My portfolio</p>
+    <p>&copy; 2026 Balabhavaniilla. All rights reserved.</p>
   </footer>
 </body>
 </html>
 """
 
 
-def generate_portfolio_html(output_path: Union[str, Path]) -> Path:
+def _coerce_path(output: Union[str, Path, None]) -> Path:
+    """Coerce the given output to a pathlib.Path instance.
+
+    Accepts None, str, or Path and returns a Path pointing to the destination file.
     """
-    Write the portfolio HTML content to a file using UTF-8 encoding.
+    if output is None:
+        return Path(DEFAULT_OUTPUT_FILE)
+    if isinstance(output, Path):
+        return output
+    if isinstance(output, str):
+        return Path(output)
+    raise TypeError("output must be a str, pathlib.Path, or None")
+
+
+def generate_portfolio_html(output: Union[str, Path] = DEFAULT_OUTPUT_FILE) -> Path:
+    """Write the portfolio HTML to the given output path.
+
+    The function will create or overwrite the file at `output` using UTF-8 encoding.
+    It returns the Path to the written file.
 
     Args:
-        output_path: Path or string specifying where to write the HTML file.
+        output: Destination file path as a string or pathlib.Path. Defaults to DEFAULT_OUTPUT_FILE.
 
     Returns:
-        Path to the written file.
-
-    Raises:
-        ValueError: If output_path is None or not a str/Path.
-        OSError: If an OS-related error occurs while writing the file.
+        pathlib.Path: The path to the generated HTML file.
     """
-    if output_path is None:
-        logger.error("No output_path provided to generate_portfolio_html.")
-        raise ValueError("output_path must not be None")
-
-    if not isinstance(output_path, (str, Path)):
-        logger.error(
-            "Invalid type for output_path: %s (expected str or Path).",
-            type(output_path),
-        )
-        raise ValueError("output_path must be a string or pathlib.Path")
-
-    path = Path(output_path)
+    out_path = _coerce_path(output)
     try:
+        html = PORTFOLIO_HTML.format(image_dim=IMAGE_DIMENSION, table_border=TABLE_BORDER)
         # Ensure parent directory exists
-        if path.parent and not path.parent.exists():
-            logger.debug("Creating parent directories for: %s", path.parent)
-            path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Write the file using a context manager and UTF-8 encoding
-        with path.open("w", encoding="utf-8") as fh:
-            fh.write(PORTFOLIO_HTML)
-        logger.info("Portfolio HTML written successfully to: %s", path.resolve())
-        return path.resolve()
-    except OSError as exc:
-        logger.exception("Failed to write portfolio HTML to %s: %s", path, exc)
+        if out_path.parent != Path("."):
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+        with out_path.open("w", encoding=DEFAULT_ENCODING) as fh:
+            fh.write(html)
+        logger.info(f"Wrote portfolio HTML to {out_path}")
+        return out_path
+    except Exception as exc:  # pragma: no cover - top-level safe guard
+        logger.exception("Failed to write portfolio HTML: %s", exc)
         raise
 
 
-def _parse_args() -> argparse.Namespace:
-    """Parse command-line arguments for the script."""
-    parser = argparse.ArgumentParser(description="Write a portfolio HTML file.")
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line arguments and return the namespace.
+
+    The parser supports an optional --output/-o argument to specify the destination file.
+    """
+    parser = argparse.ArgumentParser(description="Generate a simple portfolio HTML file.")
     parser.add_argument(
-        "--output",
         "-o",
+        "--output",
         default=DEFAULT_OUTPUT_FILE,
-        help=f"Path to output HTML file (default: {DEFAULT_OUTPUT_FILE})",
+        help=f"Output HTML file (default: {DEFAULT_OUTPUT_FILE})",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> None:
-    """Main entrypoint for CLI usage."""
-    args = _parse_args()
+def main(argv: list[str] | None = None) -> int:
+    """CLI entry point for the module.
+
+    Parses arguments and generates the portfolio HTML. Returns an exit code.
+    """
+    args = _parse_args(argv)
     try:
-        output_path = generate_portfolio_html(args.output)
-        logger.info("Done. Output file: %s", output_path)
-    except Exception as exc:  # pylint: disable=broad-except
-        logger.error("An error occurred: %s", exc)
-        raise
+        out = generate_portfolio_html(args.output)
+        logger.info(f"Portfolio generated at: {out}")
+        return 0
+    except Exception:
+        logger.error("An error occurred while generating the portfolio HTML.")
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

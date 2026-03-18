@@ -18,7 +18,13 @@ from pathlib import Path
 from typing import Union
 
 # Constants should be UPPER_CASE
-HTML_TEMPLATE: str = """<!DOCTYPE html>
+DEFAULT_OUTPUT_FILENAME = "index.html"
+VIDEO_WIDTH = 560
+VIDEO_HEIGHT = 315
+VIDEO_ID = "ZGrdjGQZ9ug"
+VIDEO_QUERY = "si=8QpruIUflkEbyucK"
+
+HTML_TEMPLATE: str = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Document character encoding for proper text rendering -->
@@ -31,8 +37,8 @@ HTML_TEMPLATE: str = """<!DOCTYPE html>
     <iframe src="" frameborder="0" title="empty-frame"></iframe>
 
     <!-- Embedded YouTube video (attributes corrected and properly quoted) -->
-    <iframe width="560" height="315"
-            src="https://www.youtube.com/embed/ZGrdjGQZ9ug?si=8QpruIUflkEbyucK"
+    <iframe width="{VIDEO_WIDTH}" height="{VIDEO_HEIGHT}"
+            src="https://www.youtube.com/embed/{VIDEO_ID}?{VIDEO_QUERY}"
             title="YouTube video player"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -91,19 +97,19 @@ def write_html_file(file_path: Union[str, Path]) -> Path:
         # Ensure parent directory exists
         parent_dir = out_path.parent
         if not parent_dir.exists():
-            logger.debug("Creating parent directories for path: %s", parent_dir)
+            logger.debug(f"Creating parent directories for path: {parent_dir}")
             parent_dir.mkdir(parents=True, exist_ok=True)
 
         # Write file using 'with' context manager and explicit encoding
-        logger.info("Writing HTML content to %s", out_path)
+        logger.info(f"Writing HTML content to {out_path}")
         with out_path.open("w", encoding="utf-8") as f:
             f.write(get_html())
 
-        logger.info("Successfully wrote HTML to %s", out_path)
+        logger.info(f"Successfully wrote HTML to {out_path}")
         return out_path
 
     except OSError as exc:
-        logger.exception("Failed to write HTML to %s: %s", out_path, exc)
+        logger.exception(f"Failed to write HTML to {out_path}: {exc}")
         raise
 
 
@@ -117,47 +123,45 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     Returns:
         argparse.Namespace: Parsed arguments with attribute 'output'.
     """
-    parser = argparse.ArgumentParser(description="Write a simple HTML file containing an iframe and a YouTube embed.")
+    if argv is None:
+        argv = sys.argv[1:]
+
+    parser = argparse.ArgumentParser(
+        description="Write a simple HTML file containing an iframe and an embedded YouTube video."
+    )
     parser.add_argument(
         "-o",
         "--output",
         dest="output",
-        default="index.html",
-        help="Output file path (default: index.html)",
+        type=str,
+        default=DEFAULT_OUTPUT_FILENAME,
+        help=f"Output HTML file path (default: {DEFAULT_OUTPUT_FILENAME})",
     )
-    return parser.parse_args(argv)
+    parsed = parser.parse_args(argv)
+    logger.debug(f"Parsed arguments: {parsed}")
+    return parsed
 
 
 def main(argv: list[str] | None = None) -> int:
     """
-    Main entry point. Writes the HTML template to the specified output file.
+    Main entry point for the module when executed as a script.
 
     Args:
-        argv (list[str] | None): Argument list to parse (defaults to sys.argv[1:]).
+        argv (list[str] | None): Optional list of command-line arguments to parse.
 
     Returns:
-        int: Exit code (0 on success, non-zero on error).
+        int: Exit code (0 for success, non-zero for failure).
     """
     try:
         args = parse_args(argv)
-        output_file = args.output
-
-        # Defensive type checking
-        if output_file is None:
-            logger.error("No output file specified.")
-            return 2
-
-        if not isinstance(output_file, (str, Path)):
-            logger.error("Invalid type for output_file: %s", type(output_file))
-            return 2
-
-        write_html_file(output_file)
+        output_path = args.output
+        written_path = write_html_file(output_path)
+        logger.info(f"Wrote HTML file to {written_path}")
         return 0
-
-    except Exception as exc:  # broad exception to ensure non-zero exit on unexpected errors
-        logger.exception("An unexpected error occurred: %s", exc)
+    except Exception as exc:  # pragma: no cover - top level error handling
+        logger.error(f"An error occurred: {exc}")
         return 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())
