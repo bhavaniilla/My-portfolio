@@ -1,5 +1,11 @@
 DEFAULT_IFRAME_WIDTH = 560
 DEFAULT_IFRAME_HEIGHT = 315
+YOUTUBE_EMBED_URL = "https://www.youtube.com/embed/ZGrdjGQZ9ug?si=8QpruIUflkEbyucK"
+IFRAME_ALLOW = (
+    "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; "
+    "picture-in-picture; web-share"
+)
+REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 
 def generate_html(width: int | None = None, height: int | None = None) -> str:
@@ -18,20 +24,20 @@ def generate_html(width: int | None = None, height: int | None = None) -> str:
         raise TypeError("width and height must be integers")
 
     html = (
-        f"<!DOCTYPE html>\n"
-        f"<html lang=\"en\">\n"
-        f"<head>\n"
-        f"    <title>audio</title>\n"
-        f"</head>\n"
-        f"<body>\n"
-        f"        <iframe src=\"\" frameborder=\"0\"></iframe>\n"
+        "<!DOCTYPE html>\n"
+        "<html lang=\"en\">\n"
+        "<head>\n"
+        "    <title>audio</title>\n"
+        "</head>\n"
+        "<body>\n"
+        "        <iframe src=\"\" frameborder=\"0\"></iframe>\n"
         f"        <iframe width=\"{width}\" height=\"{height}\" \n"
-        f"        src=\"https://www.youtube.com/embed/ZGrdjGQZ9ug?si=8QpruIUflkEbyucK\" \n"
-        f"        title=\"YouTube video player\" frameborder=\"0\n"
-        f"        allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" \n"
-        f"        referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>\n"
-        f"</body>\n"
-        f"</html>\n"
+        f"        src=\"{YOUTUBE_EMBED_URL}\" \n"
+        "        title=\"YouTube video player\" frameborder=\"0\"\n"
+        f"        allow=\"{IFRAME_ALLOW}\"\n"
+        f"        referrerpolicy=\"{REFERRER_POLICY}\" allowfullscreen></iframe>\n"
+        "</body>\n"
+        "</html>\n"
     )
     return html
 

@@ -9,6 +9,7 @@ COPYRIGHT_YEAR = 2023
 
 
 def build_portfolio_html() -> str:
+    """Build and return the HTML content for the portfolio page."""
     return f"""<!DOCTYPE html>
 <html>
     <head>
@@ -16,7 +17,7 @@ def build_portfolio_html() -> str:
     </head>
     <body>
         <header>
-        <h1>welcome to my portfolio<h1>
+        <h1>welcome to my portfolio</h1>
     <a href=""><button>about</button></a>
     <a href=""><button>skills</button></a>
     <a href=""><button>project</button></a>
@@ -24,10 +25,10 @@ def build_portfolio_html() -> str:
         </header>
         <main>
             <section id="about">
-                <img src="bhavani.jpg" hight="{IMAGE_SIZE}" width="{IMAGE_SIZE}">
+                <img src="bhavani.jpg" height="{IMAGE_SIZE}" width="{IMAGE_SIZE}">
     <h1>balabhavaniilla</h1>
     <p>I am a passionate web developer with a focus on a front-end technolgies</p>
-    <p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswar...
+    <p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswar...</i></p>
     <p>I have learnt web development form<br>code with bhavani</br></p>
     <p>you can <strong>click her</strong> to checkout what i have learnt in html css javascript</p>
             </section>
@@ -66,9 +67,9 @@ def build_portfolio_html() -> str:
     <p>feel free to get in touch with me using the form below</p>
     <form>
         <label for="name">Name:</label>
-        <input type="text"required placeholder="UserName">
+        <input type="text" required placeholder="UserName">
         <label for="email">Email:</label>
-        <input type="email"required>
+        <input type="email" required>
         <br>
         <b>choose your gender:</b>
         <input type="radio" id="male" value="male">
@@ -76,14 +77,14 @@ def build_portfolio_html() -> str:
         <input type="radio" id="female" value="female">
          <br>
         <b>choose your intersets:</b>
-        <input type="checkbox" id="coding" value="coding>
+        <input type="checkbox" id="coding" value="coding">
         <label for="coding">coding</label>
-        <input type="checkbox" id="reading value="reading>
+        <input type="checkbox" id="reading" value="reading">
         <label for="reading">reading</label>
         <br>
         <br>
-        <b><label for="bio(upto 200 charecters)">bio(up to 200 charecters)></label><br></b>
-        <textarea id="bio(upto 200 charecters)" maxlength="{BIO_MAX_LENGTH}" rows="{TEXTAREA_ROWS}" colls="{TEXTAREA_COLS}" placeholder="share your biography"...
+        <b><label for="bio">bio(up to 200 charecters)</label><br></b>
+        <textarea id="bio" maxlength="{BIO_MAX_LENGTH}" rows="{TEXTAREA_ROWS}" cols="{TEXTAREA_COLS}"></textarea>
         <br>
         <button type="submit">submit</button>
         <button type="reset">reset</button>
@@ -106,6 +107,7 @@ def build_portfolio_html() -> str:
 
 
 def save_portfolio(path: Optional[str] = None) -> str:
+    """Save the generated portfolio HTML to the given path and return the path."""
     if path is None:
         path = "portfolio.html"
     if not isinstance(path, str):
