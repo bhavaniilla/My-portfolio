@@ -1,14 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>audio</title>
-</head>
-<body>
-        <iframe src="" frameborder="0"></iframe>
-        <iframe width="560" height="315" 
-        src="https://www.youtube.com/embed/ZGrdjGQZ9ug?si=8QpruIUflkEbyucK" 
-        title="YouTube video player" frameborder="0
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</body>
-</html>
+IFRAME_WIDTH = 560
+IFRAME_HEIGHT = 315
+
+from typing import Optional
+
+
+def get_html() -> str:
+    return (
+        f'<!DOCTYPE html>\n'
+        f'<html lang="en">\n'
+        f'<head>\n'
+        f'    <title>audio</title>\n'
+        f'</head>\n'
+        f'<body>\n'
+        f'        <iframe src="" frameborder="0"></iframe>\n'
+        f'        <iframe width="{IFRAME_WIDTH}" height="{IFRAME_HEIGHT}" \n'
+        f'        src="https://www.youtube.com/embed/ZGrdjGQZ9ug?si=8QpruIUflkEbyucK" \n'
+        f'        title="YouTube video player" frameborder="0\n'
+        f'        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" \n'
+        f'        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>\n'
+        f'</body>\n'
+        f'</html>\n'
+    )
+
+
+def save_html(path: Optional[str] = None) -> Optional[str]:
+    if path is None:
+        return get_html()
+    if not isinstance(path, str):
+        raise TypeError("path must be a string")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(get_html())
+    return path
+
+
+if __name__ == "__main__":
+    # Writes to file named audio.html when run as a script
+    save_html("audio.html")
