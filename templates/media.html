@@ -65,6 +65,52 @@ def get_html() -> str:
     return HTML_TEMPLATE
 
 
+def resolve_output_path(file_path: Union[str, Path]) -> Path:
+    """
+    Resolve and validate the provided file_path argument.
+
+    Args:
+        file_path (Union[str, Path]): Path to validate and resolve.
+
+    Returns:
+        pathlib.Path: Resolved Path object.
+
+    Raises:
+        TypeError: If file_path is not a string or pathlib.Path.
+        ValueError: If file_path is None or resolves to an empty path.
+    """
+    if file_path is None:
+        logger.error("Provided file_path is None.")
+        raise ValueError("file_path must not be None")
+
+    if not isinstance(file_path, (str, Path)):
+        logger.error("file_path has invalid type: %s", type(file_path))
+        raise TypeError("file_path must be a str or pathlib.Path")
+
+    out_path = Path(file_path).expanduser().resolve()
+    if str(out_path).strip() == "":
+        logger.error("Resolved file path is empty after stripping.")
+        raise ValueError("file_path must not be empty")
+
+    return out_path
+
+
+def ensure_parent_dir(path: Path) -> None:
+    """
+    Ensure that the parent directory of the provided path exists, creating it if necessary.
+
+    Args:
+        path (pathlib.Path): Path whose parent directory should be present.
+
+    Returns:
+        None
+    """
+    parent_dir = path.parent
+    if not parent_dir.exists():
+        logger.debug(f"Creating parent directories for path: {parent_dir}")
+        parent_dir.mkdir(parents=True, exist_ok=True)
+
+
 def write_html_file(file_path: Union[str, Path]) -> Path:
     """
     Write the HTML_TEMPLATE to the given file path using safe file operations.
@@ -80,25 +126,11 @@ def write_html_file(file_path: Union[str, Path]) -> Path:
         ValueError: If file_path resolves to an empty path.
         OSError: For filesystem related errors (propagated after logging).
     """
-    if file_path is None:
-        logger.error("Provided file_path is None.")
-        raise ValueError("file_path must not be None")
-
-    if not isinstance(file_path, (str, Path)):
-        logger.error("file_path has invalid type: %s", type(file_path))
-        raise TypeError("file_path must be a str or pathlib.Path")
-
-    out_path = Path(file_path).expanduser().resolve()
-    if str(out_path).strip() == "":
-        logger.error("Resolved file path is empty after stripping.")
-        raise ValueError("file_path must not be empty")
+    out_path = resolve_output_path(file_path)
 
     try:
         # Ensure parent directory exists
-        parent_dir = out_path.parent
-        if not parent_dir.exists():
-            logger.debug(f"Creating parent directories for path: {parent_dir}")
-            parent_dir.mkdir(parents=True, exist_ok=True)
+        ensure_parent_dir(out_path)
 
         # Write file using 'with' context manager and explicit encoding
         logger.info(f"Writing HTML content to {out_path}")
@@ -121,33 +153,31 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         argv (list[str] | None): Argument list to parse (defaults to sys.argv[1:]).
 
     Returns:
-        argparse.Namespace: Parsed arguments with attribute 'output'.
+        argparse.Namespace: Parsed arguments namespace with attribute 'output'.
     """
     if argv is None:
         argv = sys.argv[1:]
 
     parser = argparse.ArgumentParser(
-        description="Write a simple HTML file containing an iframe and an embedded YouTube video."
+        description="Write a simple HTML file containing an empty iframe and an embedded YouTube video."
     )
     parser.add_argument(
         "-o",
         "--output",
-        dest="output",
-        type=str,
         default=DEFAULT_OUTPUT_FILENAME,
-        help=f"Output HTML file path (default: {DEFAULT_OUTPUT_FILENAME})",
+        help=f"Output HTML file (default: {DEFAULT_OUTPUT_FILENAME})",
     )
-    parsed = parser.parse_args(argv)
-    logger.debug(f"Parsed arguments: {parsed}")
-    return parsed
+    return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     """
-    Main entry point for the module when executed as a script.
+    Main entry point for command-line execution.
+
+    This function parses arguments and writes the HTML file to the specified location.
 
     Args:
-        argv (list[str] | None): Optional list of command-line arguments to parse.
+        argv (list[str] | None): Optional list of command-line arguments.
 
     Returns:
         int: Exit code (0 for success, non-zero for failure).
@@ -156,10 +186,10 @@ def main(argv: list[str] | None = None) -> int:
         args = parse_args(argv)
         output_path = args.output
         written_path = write_html_file(output_path)
-        logger.info(f"Wrote HTML file to {written_path}")
+        logger.info(f"HTML written to: {written_path}")
         return 0
-    except Exception as exc:  # pragma: no cover - top level error handling
-        logger.error(f"An error occurred: {exc}")
+    except Exception as exc:  # pragma: no cover - top-level exception handling
+        logger.exception("An error occurred: %s", exc)
         return 1
 
 

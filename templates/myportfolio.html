@@ -19,7 +19,7 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 # Configure module-level logger
 logger = logging.getLogger(__name__)
@@ -125,20 +125,17 @@ PORTFOLIO_HTML = """<!DOCTYPE html>
       <!-- Contact form: improved structure and accessibility -->
       <form action="#" method="post" aria-label="Contact form">
         <div>
-          <label for="name">Name:</label>
-          <input id="name" name="name" type="text" required placeholder="User Name">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" required>
         </div>
-
         <div>
-          <label for="email">Email:</label>
-          <input id="email" name="email" type="email" required placeholder="you@example.com">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required>
         </div>
-
         <div>
-          <label for="message">Message:</label>
-          <textarea id="message" name="message" rows="5" required placeholder="Your message here"></textarea>
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="5" cols="40" required></textarea>
         </div>
-
         <div>
           <button type="submit">Send</button>
         </div>
@@ -154,76 +151,104 @@ PORTFOLIO_HTML = """<!DOCTYPE html>
 """
 
 
-def _coerce_path(output: Union[str, Path, None]) -> Path:
-    """Coerce the given output to a pathlib.Path instance.
-
-    Accepts None, str, or Path and returns a Path pointing to the destination file.
+def _validate_output_path(output: Union[str, Path]) -> Path:
     """
-    if output is None:
-        return Path(DEFAULT_OUTPUT_FILE)
+    Validate and normalize the output path.
+
+    Accepts either a string or a pathlib.Path and returns a resolved Path object.
+    """
     if isinstance(output, Path):
-        return output
-    if isinstance(output, str):
-        return Path(output)
-    raise TypeError("output must be a str, pathlib.Path, or None")
-
-
-def generate_portfolio_html(output: Union[str, Path] = DEFAULT_OUTPUT_FILE) -> Path:
-    """Write the portfolio HTML to the given output path.
-
-    The function will create or overwrite the file at `output` using UTF-8 encoding.
-    It returns the Path to the written file.
-
-    Args:
-        output: Destination file path as a string or pathlib.Path. Defaults to DEFAULT_OUTPUT_FILE.
-
-    Returns:
-        pathlib.Path: The path to the generated HTML file.
-    """
-    out_path = _coerce_path(output)
+        path = output
+    elif isinstance(output, str):
+        path = Path(output)
+    else:
+        raise TypeError("output must be a str or pathlib.Path")
+    # Expand user and resolve, but do not require that parent exists.
     try:
-        html = PORTFOLIO_HTML.format(image_dim=IMAGE_DIMENSION, table_border=TABLE_BORDER)
-        # Ensure parent directory exists
-        if out_path.parent != Path("."):
-            out_path.parent.mkdir(parents=True, exist_ok=True)
-        with out_path.open("w", encoding=DEFAULT_ENCODING) as fh:
-            fh.write(html)
-        logger.info(f"Wrote portfolio HTML to {out_path}")
-        return out_path
-    except Exception as exc:  # pragma: no cover - top-level safe guard
-        logger.exception("Failed to write portfolio HTML: %s", exc)
+        resolved = path.expanduser().resolve()
+    except Exception:
+        # If resolution fails (e.g., path includes non-existing mount), fallback to expanduser.
+        resolved = path.expanduser()
+    return resolved
+
+
+def generate_portfolio_html(
+    output_file: Union[str, Path] = DEFAULT_OUTPUT_FILE,
+    encoding: str = DEFAULT_ENCODING,
+) -> Path:
+    """
+    Generate the portfolio HTML file at the given output_file path using the specified encoding.
+
+    Returns the Path to the written file. Raises exceptions for invalid inputs.
+    """
+    if output_file is None:
+        raise ValueError("output_file must not be None")
+    if encoding is None:
+        raise ValueError("encoding must not be None")
+    if not isinstance(encoding, str):
+        raise TypeError("encoding must be a str")
+
+    out_path = _validate_output_path(output_file)
+    html_content = PORTFOLIO_HTML.format(image_dim=IMAGE_DIMENSION, table_border=TABLE_BORDER)
+
+    # Ensure parent directory exists
+    parent = out_path.parent
+    if parent and not parent.exists():
+        try:
+            parent.mkdir(parents=True, exist_ok=True)
+            logger.debug("Created parent directory: %s", parent)
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.error("Could not create parent directory %s: %s", parent, exc)
+            raise
+
+    try:
+        with out_path.open("w", encoding=encoding) as fh:
+            fh.write(html_content)
+        logger.info("Portfolio HTML written to %s", out_path)
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.error("Failed to write portfolio HTML to %s: %s", out_path, exc)
         raise
 
+    return out_path
 
-def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    """Parse command-line arguments and return the namespace.
 
-    The parser supports an optional --output/-o argument to specify the destination file.
+def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     """
-    parser = argparse.ArgumentParser(description="Generate a simple portfolio HTML file.")
+    Parse command-line arguments.
+
+    Returns the populated Namespace object.
+    """
+    parser = argparse.ArgumentParser(description="Write a portfolio HTML file.")
     parser.add_argument(
-        "-o",
         "--output",
+        "-o",
         default=DEFAULT_OUTPUT_FILE,
-        help=f"Output HTML file (default: {DEFAULT_OUTPUT_FILE})",
+        help=f"Output file path (default: {DEFAULT_OUTPUT_FILE})",
+    )
+    parser.add_argument(
+        "--encoding",
+        "-e",
+        default=DEFAULT_ENCODING,
+        help=f"File encoding (default: {DEFAULT_ENCODING})",
     )
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> int:
-    """CLI entry point for the module.
+def main(argv: Optional[list[str]] = None) -> int:
+    """
+    Entry point for CLI usage.
 
-    Parses arguments and generates the portfolio HTML. Returns an exit code.
+    Parses arguments and calls generate_portfolio_html. Returns exit code 0 on success.
     """
     args = _parse_args(argv)
     try:
-        out = generate_portfolio_html(args.output)
-        logger.info(f"Portfolio generated at: {out}")
+        output_path = generate_portfolio_html(args.output, args.encoding)
+        logger.info("Successfully created portfolio at %s", output_path)
         return 0
-    except Exception:
-        logger.error("An error occurred while generating the portfolio HTML.")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.exception("An error occurred: %s", exc)
         return 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - invoked as script
     raise SystemExit(main())
