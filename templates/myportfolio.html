@@ -1,3 +1,5 @@
+"""Module to build and save a simple portfolio HTML page."""
+
 from typing import Optional
 
 IMAGE_SIZE = 200
@@ -6,6 +8,7 @@ BIO_MAX_LENGTH = 200
 TEXTAREA_ROWS = 5
 TEXTAREA_COLS = 5
 COPYRIGHT_YEAR = 2023
+DEFAULT_PORTFOLIO_FILENAME = "portfolio.html"
 
 
 def build_portfolio_html() -> str:
@@ -28,7 +31,7 @@ def build_portfolio_html() -> str:
                 <img src="bhavani.jpg" height="{IMAGE_SIZE}" width="{IMAGE_SIZE}">
     <h1>balabhavaniilla</h1>
     <p>I am a passionate web developer with a focus on a front-end technolgies</p>
-    <p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswar...</i></p>
+    <p>iam complete my mca in <em>andhrauniversity vishakapatnam</em> i did my degree in <i>srivasavikanyakaparmeswar...
     <p>I have learnt web development form<br>code with bhavani</br></p>
     <p>you can <strong>click her</strong> to checkout what i have learnt in html css javascript</p>
             </section>
@@ -109,7 +112,7 @@ def build_portfolio_html() -> str:
 def save_portfolio(path: Optional[str] = None) -> str:
     """Save the generated portfolio HTML to the given path and return the path."""
     if path is None:
-        path = "portfolio.html"
+        path = DEFAULT_PORTFOLIO_FILENAME
     if not isinstance(path, str):
         raise TypeError("path must be a string")
     html = build_portfolio_html()

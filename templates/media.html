@@ -1,5 +1,12 @@
-DEFAULT_IFRAME_WIDTH = 560
-DEFAULT_IFRAME_HEIGHT = 315
+"""
+HTML generator module for embedding a YouTube video in an iframe.
+"""
+
+DEFAULT_IFRAME_WIDTH_VALUE = 560
+DEFAULT_IFRAME_HEIGHT_VALUE = 315
+
+DEFAULT_IFRAME_WIDTH = DEFAULT_IFRAME_WIDTH_VALUE
+DEFAULT_IFRAME_HEIGHT = DEFAULT_IFRAME_HEIGHT_VALUE
 YOUTUBE_EMBED_URL = "https://www.youtube.com/embed/ZGrdjGQZ9ug?si=8QpruIUflkEbyucK"
 IFRAME_ALLOW = (
     "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; "
@@ -20,7 +27,7 @@ def generate_html(width: int | None = None, height: int | None = None) -> str:
     if height is None:
         height = DEFAULT_IFRAME_HEIGHT
 
-    if not isinstance(width, int) or not isinstance(height, int):
+    if not (isinstance(width, int) and isinstance(height, int)):
         raise TypeError("width and height must be integers")
 
     html = (
