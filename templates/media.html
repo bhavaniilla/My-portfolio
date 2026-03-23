@@ -15,7 +15,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 
 # Constants should be UPPER_CASE
 DEFAULT_OUTPUT_FILENAME = "index.html"
@@ -127,71 +127,75 @@ def write_html_file(file_path: Union[str, Path]) -> Path:
         OSError: For filesystem related errors (propagated after logging).
     """
     out_path = resolve_output_path(file_path)
+    ensure_parent_dir(out_path)
 
     try:
-        # Ensure parent directory exists
-        ensure_parent_dir(out_path)
-
-        # Write file using 'with' context manager and explicit encoding
-        logger.info(f"Writing HTML content to {out_path}")
-        with out_path.open("w", encoding="utf-8") as f:
-            f.write(get_html())
-
-        logger.info(f"Successfully wrote HTML to {out_path}")
-        return out_path
-
+        logger.info(f"Writing HTML to {out_path}")
+        # Use 'with' to ensure file is properly closed
+        with out_path.open("w", encoding="utf-8") as fh:
+            fh.write(get_html())
     except OSError as exc:
-        logger.exception(f"Failed to write HTML to {out_path}: {exc}")
+        logger.exception("Failed to write HTML file to %s: %s", out_path, exc)
         raise
 
+    logger.info(f"Successfully wrote HTML to {out_path}")
+    return out_path
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+
+def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     """
     Parse command-line arguments.
 
     Args:
-        argv (list[str] | None): Argument list to parse (defaults to sys.argv[1:]).
+        argv (Optional[list[str]]): List of arguments to parse. If None, uses sys.argv[1:].
 
     Returns:
-        argparse.Namespace: Parsed arguments namespace with attribute 'output'.
+        argparse.Namespace: Parsed arguments namespace.
     """
-    if argv is None:
-        argv = sys.argv[1:]
-
-    parser = argparse.ArgumentParser(
-        description="Write a simple HTML file containing an empty iframe and an embedded YouTube video."
-    )
+    parser = argparse.ArgumentParser(description="Write an HTML file containing an iframe and a YouTube embed.")
     parser.add_argument(
         "-o",
         "--output",
+        dest="output",
+        type=str,
         default=DEFAULT_OUTPUT_FILENAME,
-        help=f"Output HTML file (default: {DEFAULT_OUTPUT_FILENAME})",
+        help=f"Output filename (default: {DEFAULT_OUTPUT_FILENAME})",
     )
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: Optional[list[str]] = None) -> int:
     """
-    Main entry point for command-line execution.
-
-    This function parses arguments and writes the HTML file to the specified location.
+    Main entry point for the module when used as a script.
 
     Args:
-        argv (list[str] | None): Optional list of command-line arguments.
+        argv (Optional[list[str]]): Command-line arguments; if None, sys.argv[1:] is used.
 
     Returns:
         int: Exit code (0 for success, non-zero for failure).
     """
     try:
         args = parse_args(argv)
-        output_path = args.output
-        written_path = write_html_file(output_path)
-        logger.info(f"HTML written to: {written_path}")
+        output = args.output
+        if output is None:
+            # This should not normally happen because argparse provides a default,
+            # but guard defensively.
+            output = DEFAULT_OUTPUT_FILENAME
+            logger.debug("No output provided; using default %s", DEFAULT_OUTPUT_FILENAME)
+
+        result_path = write_html_file(output)
+        logger.info(f"HTML written to: {result_path}")
         return 0
-    except Exception as exc:  # pragma: no cover - top-level exception handling
-        logger.exception("An error occurred: %s", exc)
+    except (TypeError, ValueError) as exc:
+        logger.error("Invalid usage: %s", exc)
+        return 2
+    except OSError as exc:
+        logger.error("Filesystem error: %s", exc)
+        return 1
+    except Exception as exc:  # pragma: no cover - defensive catchall
+        logger.exception("Unexpected error: %s", exc)
         return 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))
